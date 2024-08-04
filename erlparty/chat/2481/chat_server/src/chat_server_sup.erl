@@ -25,21 +25,23 @@ start_link() ->
 %%                  shutdown => shutdown(), % optional
 %%                  type => worker(),       % optional
 %%                  modules => modules()}   % optional
+%init([]) ->
+%    SupFlags = #{strategy => one_for_all,
+%                 intensity => 0,
+%                 period => 1},
+%    ChildSpecs = [],
+%    {ok, {SupFlags, ChildSpecs}}.
+
 init([]) ->
-	SupFlags = #{strategy => one_for_one,
-                     intensity => 1,
-                     period => 5},
-	ChildSpecs = [#{id => chat_server,
-                        start => {chat_server, start_link, []},
-                        restart => permanent,
-                        shutdown => 5000,
-                        type => worker,
-                        modules => [chat_server]}],
-	{ok, {SupFlags, ChildSpecs}}.
-    %%SupFlags = #{strategy => one_for_all,
-    %%            intensity => 0,
-    %%             period => 1},
-    %%ChildSpecs = [],
-    %%{ok, {SupFlags, ChildSpecs}}.
+    SupFlags = #{strategy => one_for_one,
+                 intensity => 1,
+                 period => 5},
+    ChildSpecs = [#{id => chat_server,
+                    start => {chat_server, start_link, []},
+                    restart => permanent,
+                    shutdown => 5000,
+                    type => worker,
+                    modules => [chat_server]}],
+    {ok, {SupFlags, ChildSpecs}}.
 
 %% internal functions
