@@ -35,19 +35,23 @@ public class LargestRectangle {
 
     public static Result safeMaximalRectangle(int[][] matrix) {
         try {
-            if (matrix == null || matrix.length == 0) {
-                throw new IllegalArgumentException("Empty matrix");
+            if (matrix == null) {
+                throw new IllegalArgumentException("Matrix is null");
+            }
+            if (matrix.length == 0 || (matrix.length > 0 && matrix[0].length == 0)) {
+                return new Result(0, null); // Valid empty matrix, return area 0
             }
             int rowLength = matrix[0].length;
-            if (Arrays.stream(matrix).anyMatch(row -> row.length != rowLength)) {
-                throw new IllegalArgumentException("Matrix is not rectangular");
+            if (Arrays.stream(matrix).anyMatch(row -> row == null || row.length != rowLength)) {
+                throw new IllegalArgumentException("Matrix is not rectangular or contains null rows");
             }
             if (Arrays.stream(matrix)
                       .flatMapToInt(Arrays::stream)
                       .anyMatch(val -> val != 0 && val != 1)) {
                 throw new IllegalArgumentException("Matrix should contain only 0's and 1's");
             }
-            return new Result(maximalRectangle(matrix), null);
+            int area = maximalRectangle(matrix);
+            return new Result(area, null);
         } catch (Exception e) {
             return new Result(-1, "Error: " + e.getMessage());
         }

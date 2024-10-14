@@ -30,11 +30,19 @@ class LargestRectanglePropertyTest {
     }
 
     @Property
-    void emptyMatrixReturnsZero() {
+    void emptyMatrixReturnsZeroWithoutError() {
         int[][] emptyMatrix = new int[0][0];
         LargestRectangle.Result result = LargestRectangle.safeMaximalRectangle(emptyMatrix);
         assertEquals(0, result.area(), "Empty matrix should return area 0");
-        assertNotNull(result.errorMessage(), "Empty matrix should produce an error message");
+        assertNull(result.errorMessage(), "Empty matrix should not produce an error message");
+    }
+
+    @Property
+    void matrixWithEmptyRowsReturnsZeroWithoutError() {
+        int[][] matrixWithEmptyRows = new int[5][0];
+        LargestRectangle.Result result = LargestRectangle.safeMaximalRectangle(matrixWithEmptyRows);
+        assertEquals(0, result.area(), "Matrix with empty rows should return area 0");
+        assertNull(result.errorMessage(), "Matrix with empty rows should not produce an error message");
     }
 
     @Property
@@ -43,6 +51,7 @@ class LargestRectanglePropertyTest {
         int[][] zeroMatrix = new int[rows][cols];
         LargestRectangle.Result result = LargestRectangle.safeMaximalRectangle(zeroMatrix);
         assertEquals(0, result.area(), "Matrix with all zeros should return area 0");
+        assertNull(result.errorMessage(), "Matrix with all zeros should not produce an error message");
     }
 
     @Property
@@ -56,6 +65,7 @@ class LargestRectanglePropertyTest {
         }
         LargestRectangle.Result result = LargestRectangle.safeMaximalRectangle(oneMatrix);
         assertEquals(rows * cols, result.area(), "Matrix with all ones should return full area");
+        assertNull(result.errorMessage(), "Matrix with all ones should not produce an error message");
     }
 
     @Property
@@ -70,14 +80,26 @@ class LargestRectanglePropertyTest {
         return Arbitraries.oneOf(
                 Arbitraries.just(null),
                 Arbitraries.integers().between(2, 20).map(size -> {
-                    int[][] matrix = new int[size][size];
+                    int[][] matrix = new int[size][];
                     matrix[0] = new int[size - 1]; // Make the first row shorter
+                    for (int i = 1; i < size; i++) {
+                        matrix[i] = new int[size];
+                    }
                     return matrix;
                 }),
                 Arbitraries.integers().between(1, 20).flatMap(rows ->
                         Arbitraries.integers().between(1, 20).flatMap(cols ->
-                                Arbitraries.integers().array(int[].class).ofSize(cols)
+                                Arbitraries.integers().between(2, 10).array(int[].class).ofSize(cols)
                                         .array(int[][].class).ofSize(rows)))
         );
+    }
+
+    @Property
+    void matrixFilledWithZerosReturnsZero(@ForAll @IntRange(min = 1, max = 20) int rows,
+                                          @ForAll @IntRange(min = 1, max = 20) int cols) {
+        int[][] zeroMatrix = new int[rows][cols];
+        LargestRectangle.Result result = LargestRectangle.safeMaximalRectangle(zeroMatrix);
+        assertEquals(0, result.area(), "Matrix filled with zeros should return area 0");
+        assertNull(result.errorMessage(), "Matrix filled with zeros should not produce an error message");
     }
 }
