@@ -44,54 +44,6 @@ class SocialHubNetworkPropertyTest {
                                           "Path should be continuous"));
     }
 
-    // @Property
-    // void pathIsValid(@ForAll("connectedNetworkGenerator") Tuple2<SocialHubNetwork, List<SocialHubNetwork.Hub>> networkAndHubs) {
-    //     SocialHubNetwork network = networkAndHubs.get1();
-    //     List<SocialHubNetwork.Hub> hubs = networkAndHubs.get2();
-    //     Assume.that(hubs.size() >= 2);
-    //
-    //     SocialHubNetwork.Hub start = hubs.get(0);
-    //     SocialHubNetwork.Hub end = hubs.get(hubs.size() - 1);
-    //
-    //     SocialHubNetwork.Path path = network.findFastestPath(start, end);
-    //
-    //     assertNotNull(path, "Path should not be null");
-    //     assertFalse(path.hubs().isEmpty(), "Path should not be empty");
-    //     assertEquals(start, path.hubs().get(0), "Path should start at the start hub");
-    //     assertEquals(end, path.hubs().get(path.hubs().size() - 1), "Path should end at the end hub");
-    //     assertTrue(path.totalTime() >= 0, "Total time should be non-negative");
-    //
-    //     // Check if the path is continuous
-    //     IntStream.range(0, path.hubs().size() - 1)
-    //              .forEach(i -> assertTrue(network.areConnected(path.hubs().get(i), path.hubs().get(i + 1)),
-    //                                       "Path should be continuous"));
-    // }
-/*
-    @Property
-    void pathIsValid(@ForAll("networkGenerator") SocialHubNetwork network,
-                     @ForAll("hubGenerator") SocialHubNetwork.Hub start,
-                     @ForAll("hubGenerator") SocialHubNetwork.Hub end) {
-        Assume.that(network.containsHub(start) && network.containsHub(end));
-        Assume.that(!start.equals(end)); // Ensure start and end are different
-
-        SocialHubNetwork.Path path = network.findFastestPath(start, end);
-
-        if (path.totalTime() == -1) {
-            // No path found, which is valid if the hubs are not connected
-            return;
-        }
-
-        assertFalse(path.hubs().isEmpty(), "Path should not be empty");
-        assertEquals(start, path.hubs().get(0), "Path should start at the start hub");
-        assertEquals(end, path.hubs().get(path.hubs().size() - 1), "Path should end at the end hub");
-        assertTrue(path.totalTime() >= 0, "Total time should be non-negative");
-
-        // Check if the path is continuous
-        IntStream.range(0, path.hubs().size() - 1)
-                 .forEach(i -> assertTrue(network.areConnected(path.hubs().get(i), path.hubs().get(i + 1)),
-                                          "Path should be continuous"));
-    }*/
-
     @Property
     void shortestPathIsOptimal(@ForAll("connectedNetworkGenerator") NetworkAndHubs networkAndHubs) {
         SocialHubNetwork network = networkAndHubs.getNetwork();
@@ -110,47 +62,6 @@ class SocialHubNetworkPropertyTest {
                 .forEach(pathTime -> assertTrue(pathTime >= shortestPath.totalTime(),
                                                 "No path should be shorter than the shortest path"));
     }
-
-    // @Property
-    // void shortestPathIsOptimal(@ForAll("connectedNetworkGenerator") Tuple2<SocialHubNetwork, List<SocialHubNetwork.Hub>> networkAndHubs) {
-    //     SocialHubNetwork network = networkAndHubs.get1();
-    //     List<SocialHubNetwork.Hub> hubs = networkAndHubs.get2();
-    //     Assume.that(hubs.size() >= 2);
-    //
-    //     SocialHubNetwork.Hub start = hubs.get(0);
-    //     SocialHubNetwork.Hub end = hubs.get(hubs.size() - 1);
-    //
-    //     SocialHubNetwork.Path shortestPath = network.findFastestPath(start, end);
-    //
-    //     // Check all possible paths
-    //     List<List<SocialHubNetwork.Hub>> allPaths = findAllPaths(network, start, end);
-    //     allPaths.stream()
-    //             .map(path -> calculatePathTime(network, path))
-    //             .forEach(pathTime -> assertTrue(pathTime >= shortestPath.totalTime(),
-    //                                             "No path should be shorter than the shortest path"));
-    // }
-
-    // @Property
-    // void shortestPathIsOptimal(@ForAll("networkGenerator") SocialHubNetwork network,
-    //                            @ForAll("hubGenerator") SocialHubNetwork.Hub start,
-    //                            @ForAll("hubGenerator") SocialHubNetwork.Hub end) {
-    //     Assume.that(network.containsHub(start) && network.containsHub(end));
-    //     Assume.that(!start.equals(end)); // Ensure start and end are different
-    //
-    //     SocialHubNetwork.Path shortestPath = network.findFastestPath(start, end);
-    //
-    //     if (shortestPath.totalTime() == -1) {
-    //         // No path found, which is valid if the hubs are not connected
-    //         return;
-    //     }
-    //
-    //     // Check all possible paths
-    //     List<List<SocialHubNetwork.Hub>> allPaths = findAllPaths(network, start, end);
-    //     allPaths.stream()
-    //             .map(path -> calculatePathTime(network, path))
-    //             .forEach(pathTime -> assertTrue(pathTime >= shortestPath.totalTime(),
-    //                                             "No path should be shorter than the shortest path"));
-    // }
 
     @Provide
     Arbitrary<NetworkAndHubs> connectedNetworkGenerator() {
@@ -182,62 +93,6 @@ class SocialHubNetworkPropertyTest {
             return new NetworkAndHubs(network, hubs);
         });
     }
-
-    // @Provide
-    // Arbitrary<Tuple2<SocialHubNetwork, List<SocialHubNetwork.Hub>>> connectedNetworkGenerator() {
-    //     return Combinators.combine(
-    //         Arbitraries.integers().between(2, 10),
-    //         hubNames(),
-    //         travelTimes()
-    //     ).as((numHubs, hubName, travelTime) -> {
-    //         SocialHubNetwork network = new SocialHubNetwork();
-    //         List<SocialHubNetwork.Hub> hubs = IntStream.range(0, numHubs)
-    //             .mapToObj(i -> new SocialHubNetwork.Hub(hubName + i))
-    //             .peek(hub -> network.applyOperation(new SocialHubNetwork.AddHub(hub)))
-    //             .toList();
-    //
-    //         // Ensure the network is connected
-    //         for (int i = 1; i < hubs.size(); i++) {
-    //             network.applyOperation(new SocialHubNetwork.AddRoad(new SocialHubNetwork.Road(hubs.get(i-1), hubs.get(i), travelTime)));
-    //         }
-    //
-    //         // Add some random additional connections
-    //         hubs.stream()
-    //             .flatMap(hub1 -> hubs.stream()
-    //                 .filter(hub2 -> !hub1.equals(hub2))
-    //                 .filter(hub2 -> !network.areConnected(hub1, hub2))
-    //                 .filter(hub2 -> Arbitraries.integers().between(0, 2).sample() > 0) // 2/3 probability
-    //                 .map(hub2 -> new SocialHubNetwork.Road(hub1, hub2, travelTime)))
-    //             .forEach(road -> network.applyOperation(new SocialHubNetwork.AddRoad(road)));
-    //
-    //         return Tuple.of(network, hubs);
-    //     });
-    // }
-
-    // @Provide
-    // Arbitrary<SocialHubNetwork> networkGenerator() {
-    //     return Combinators.combine(
-    //         Arbitraries.integers().between(5, 15),
-    //         hubNames(),
-    //         travelTimes()
-    //     ).as((numHubs, hubName, travelTime) -> {
-    //         SocialHubNetwork network = new SocialHubNetwork();
-    //         List<SocialHubNetwork.Hub> hubs = IntStream.range(0, numHubs)
-    //             .mapToObj(i -> new SocialHubNetwork.Hub(hubName + i))
-    //             .peek(hub -> network.applyOperation(new SocialHubNetwork.AddHub(hub)))
-    //             .toList();
-    //
-    //         // Add roads with a higher probability
-    //         hubs.stream()
-    //             .flatMap(hub1 -> hubs.stream()
-    //                 .filter(hub2 -> !hub1.equals(hub2))
-    //                 .filter(hub2 -> Arbitraries.integers().between(0, 2).sample() > 0) // 2/3 probability
-    //                 .map(hub2 -> new SocialHubNetwork.Road(hub1, hub2, travelTime)))
-    //             .forEach(road -> network.applyOperation(new SocialHubNetwork.AddRoad(road)));
-    //
-    //         return network;
-    //     });
-    // }
 
     @Provide
     Arbitrary<SocialHubNetwork.Hub> hubGenerator() {
@@ -284,28 +139,6 @@ class SocialHubNetworkPropertyTest {
         assertEquals(-1, path.totalTime(), "Empty network should return no path");
         assertTrue(path.hubs().isEmpty(), "Empty network should return empty path");
     }
-
-    // @Example
-    // void testEmptyNetwork() {
-    //     SocialHubNetwork network = new SocialHubNetwork();
-    //     SocialHubNetwork.Hub start = new SocialHubNetwork.Hub("Start");
-    //     SocialHubNetwork.Hub end = new SocialHubNetwork.Hub("End");
-    //
-    //     SocialHubNetwork.Path path = network.findFastestPath(start, end);
-    //     assertEquals(-1, path.totalTime(), "Empty network should return no path");
-    //     assertTrue(path.hubs().isEmpty(), "Empty network should return empty path");
-    // }
-
-    // @Example
-    // void testEmptyNetwork() {
-    //     SocialHubNetwork network = new SocialHubNetwork();
-    //     SocialHubNetwork.Hub start = new SocialHubNetwork.Hub("Start");
-    //     SocialHubNetwork.Hub end = new SocialHubNetwork.Hub("End");
-    //
-    //     SocialHubNetwork.Path path = network.findFastestPath(start, end);
-    //     assertEquals(-1, path.totalTime(), "Empty network should return no path");
-    //     assertTrue(path.hubs().isEmpty(), "Empty network should return empty path");
-    // }
 
     @Example
     void testSingleHub() {
